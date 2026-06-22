@@ -79,21 +79,27 @@ const mobileMenuVariants = {
    ═══════════════════════════════════════════════════════════ */
 
 interface NavbarProps {
-  /** Whether the hero door animation is complete */
-  heroAnimationDone: boolean;
+  /** Whether the hero doors have opened (navbar fades in after this) */
+  doorsOpen: boolean;
 }
 
-export default function Navbar({ heroAnimationDone }: NavbarProps) {
+export default function Navbar({ doorsOpen }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /* ── Scroll listener for bg transition ── */
+  /* ── Scroll listener: transitions from transparent → solid ── */
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > window.innerHeight * 0.85);
+      /* Find the hero scroll container and use its bottom as threshold */
+      const heroContainer = document.getElementById("hero-scroll-container");
+      const threshold = heroContainer
+        ? heroContainer.offsetHeight - window.innerHeight * 0.15
+        : window.innerHeight * 0.85;
+
+      setIsScrolled(window.scrollY > threshold);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -143,7 +149,7 @@ export default function Navbar({ heroAnimationDone }: NavbarProps) {
       }`}
       variants={navbarVariants}
       initial="hidden"
-      animate={heroAnimationDone ? "visible" : "hidden"}
+      animate={doorsOpen ? "visible" : "hidden"}
       id="main-navbar"
     >
       <nav
@@ -168,18 +174,24 @@ export default function Navbar({ heroAnimationDone }: NavbarProps) {
           </Link>
 
           {/* ── Desktop Nav Links (center) ── */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-0.5">
             {PRIMARY_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 xl:px-4 py-2 text-sm font-body font-medium rounded-lg transition-colors duration-200 ${
+                className={`relative group px-3 xl:px-4 py-2 text-sm font-body font-medium rounded-lg transition-colors duration-200 ${
                   isTransparent
-                    ? "text-white/90 hover:text-white hover:bg-white/10"
+                    ? "text-white/85 hover:text-white"
                     : "text-gray-700 hover:text-[#124a6d] hover:bg-gray-50"
                 }`}
               >
                 {link.label}
+                {/* Animated underline on hover */}
+                <span
+                  className={`absolute bottom-0.5 left-3 right-3 h-[2px] rounded-full transition-all duration-300 ease-out origin-left scale-x-0 group-hover:scale-x-100 ${
+                    isTransparent ? "bg-[#d3a044]" : "bg-[#124a6d]"
+                  }`}
+                />
               </Link>
             ))}
 
@@ -192,9 +204,9 @@ export default function Navbar({ heroAnimationDone }: NavbarProps) {
             >
               <button
                 onClick={() => setMoreOpen((prev) => !prev)}
-                className={`flex items-center gap-1 px-3 xl:px-4 py-2 text-sm font-body font-medium rounded-lg transition-colors duration-200 ${
+                className={`relative group flex items-center gap-1 px-3 xl:px-4 py-2 text-sm font-body font-medium rounded-lg transition-colors duration-200 ${
                   isTransparent
-                    ? "text-white/90 hover:text-white hover:bg-white/10"
+                    ? "text-white/85 hover:text-white"
                     : "text-gray-700 hover:text-[#124a6d] hover:bg-gray-50"
                 }`}
                 aria-expanded={moreOpen}
@@ -205,6 +217,12 @@ export default function Navbar({ heroAnimationDone }: NavbarProps) {
                 <ChevronDown
                   className={`w-4 h-4 transition-transform duration-200 ${
                     moreOpen ? "rotate-180" : ""
+                  }`}
+                />
+                {/* Animated underline on hover */}
+                <span
+                  className={`absolute bottom-0.5 left-3 right-3 h-[2px] rounded-full transition-all duration-300 ease-out origin-left scale-x-0 group-hover:scale-x-100 ${
+                    isTransparent ? "bg-[#d3a044]" : "bg-[#124a6d]"
                   }`}
                 />
               </button>
@@ -236,11 +254,27 @@ export default function Navbar({ heroAnimationDone }: NavbarProps) {
             </div>
           </div>
 
-          {/* ── Desktop CTA ── */}
+          {/* ── Desktop CTA (shimmer gradient) ── */}
           <div className="hidden lg:flex items-center">
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-6 py-2.5 bg-[#d3a044] text-white font-body font-semibold text-sm rounded-full shadow-md shadow-[#d3a044]/20 hover:bg-[#b88b3a] hover:shadow-lg hover:shadow-[#d3a044]/30 active:scale-[0.97] transition-all duration-300"
+              className="
+                inline-flex items-center justify-center
+                px-6 py-2.5
+                text-white font-body font-semibold text-sm
+                rounded-full
+                shadow-md shadow-[#d3a044]/25
+                hover:shadow-lg hover:shadow-[#d3a044]/35
+                hover:scale-[1.03]
+                active:scale-[0.97]
+                transition-all duration-300
+                animate-shimmer
+              "
+              style={{
+                background:
+                  "linear-gradient(110deg, #d3a044 0%, #d3a044 40%, #e8c878 50%, #d3a044 60%, #d3a044 100%)",
+                backgroundSize: "200% 100%",
+              }}
               id="nav-cta-get-started"
             >
               Get Started
@@ -297,7 +331,20 @@ export default function Navbar({ heroAnimationDone }: NavbarProps) {
                 <div className="px-4 pt-2">
                   <Link
                     href="/contact"
-                    className="block w-full text-center px-6 py-3 bg-[#d3a044] text-white font-body font-semibold text-base rounded-full shadow-md shadow-[#d3a044]/20 hover:bg-[#b88b3a] transition-all duration-300"
+                    className="
+                      block w-full text-center
+                      px-6 py-3
+                      text-white font-body font-semibold text-base
+                      rounded-full
+                      shadow-md shadow-[#d3a044]/20
+                      transition-all duration-300
+                      animate-shimmer
+                    "
+                    style={{
+                      background:
+                        "linear-gradient(110deg, #d3a044 0%, #d3a044 40%, #e8c878 50%, #d3a044 60%, #d3a044 100%)",
+                      backgroundSize: "200% 100%",
+                    }}
                     onClick={() => setMobileOpen(false)}
                   >
                     Get Started

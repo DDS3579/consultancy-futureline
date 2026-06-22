@@ -1,388 +1,342 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import {
   motion,
+  useScroll,
+  useTransform,
   useReducedMotion,
-  type Variants,
-  type Transition,
+  useMotionValueEvent,
 } from "framer-motion";
 
 /* ─────────────────────────── Constants ─────────────────────────── */
 
-/** Delay before the intro text appears (ms) */
-const INTRO_TEXT_DELAY_MS = 300;
-/** Duration the intro text stays visible before fading (ms) */
-const INTRO_TEXT_DISPLAY_MS = 1800;
-/** Duration of door-open animation (seconds) */
-const DOOR_OPEN_DURATION = 2;
 /** Final rotation angle for door panels (degrees) */
 const DOOR_ROTATION_DEG = 110;
 
-/* ─────────── Apple-style ease curve (cubic-bezier) ─────────── */
-const CINEMATIC_EASE: Transition["ease"] = [0.25, 0.1, 0.25, 1];
+/** Height multiplier for scroll area (×viewport height).
+ *  The user scrolls through this distance to complete the full reveal. */
+const SCROLL_HEIGHT_MULTIPLIER = 3;
 
-/* ───────────────────── Animation Variants ───────────────────── */
-
-const leftDoorVariants: Variants = {
-  closed: {
-    rotateY: 0,
-    opacity: 1,
-  },
-  open: {
-    rotateY: -DOOR_ROTATION_DEG,
-    opacity: 0,
-    transition: {
-      rotateY: {
-        duration: DOOR_OPEN_DURATION,
-        ease: CINEMATIC_EASE,
-      },
-      opacity: {
-        duration: DOOR_OPEN_DURATION * 0.2,
-        delay: DOOR_OPEN_DURATION * 0.8,
-        ease: "easeOut",
-      },
-    },
-  },
-};
-
-const rightDoorVariants: Variants = {
-  closed: {
-    rotateY: 0,
-    opacity: 1,
-  },
-  open: {
-    rotateY: DOOR_ROTATION_DEG,
-    opacity: 0,
-    transition: {
-      rotateY: {
-        duration: DOOR_OPEN_DURATION,
-        ease: CINEMATIC_EASE,
-      },
-      opacity: {
-        duration: DOOR_OPEN_DURATION * 0.2,
-        delay: DOOR_OPEN_DURATION * 0.8,
-        ease: "easeOut",
-      },
-    },
-  },
-};
-
-const backgroundVariants: Variants = {
-  hidden: {
-    scale: 1.08,
-  },
-  revealed: {
-    scale: 1,
-    transition: {
-      duration: DOOR_OPEN_DURATION + 0.5,
-      ease: CINEMATIC_EASE,
-    },
-  },
-};
-
-const introTextVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 1,
-      ease: "easeOut",
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    transition: {
-      duration: 0.6,
-      ease: "easeIn",
-    },
-  },
-};
-
-const contentContainerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.18,
-      delayChildren: 0,
-    },
-  },
-};
-
-const contentItemVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 30,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: [0.25, 0.1, 0.25, 1],
-    },
-  },
-};
-
-/* ───────────────────── Animation Phases ───────────────────── */
-
-type AnimationPhase =
-  | "idle"
-  | "intro-text"
-  | "intro-fade"
-  | "doors-opening"
-  | "content-reveal"
-  | "complete";
+/** Scroll progress threshold at which we signal "doors are open" */
+const DOORS_OPEN_THRESHOLD = 0.62;
 
 /* ════════════════════════════════════════════════════════════════
-   Component: HeroDoorReveal
-   ════════════════════════════════════════════════════════════════ */
+   Component: HeroDoorReveal  (scroll-driven)
+   ════════════════════════════════════════════════════════════════
+
+   Timeline mapped to scrollYProgress (0 → 1):
+
+   0.00–0.10  Intro text fades in
+   0.10–0.18  Intro text holds
+   0.18–0.28  Intro text fades out
+   0.28–0.68  Doors rotate open
+   0.58–0.68  Door panels fade to transparent
+   0.28–0.72  Background image settles (scale 1.08→1)
+   0.62–0.76  Headline fades in
+   0.68–0.82  Sub-headline fades in
+   0.74–0.88  CTA button fades in
+   0.00–0.12  Scroll-indicator visible, then fades
+   ──────────────────────────────────────────────────────────────── */
 
 interface HeroDoorRevealProps {
-  /** Callback fired when the door animation is mostly done and navbar should appear */
-  onAnimationDone?: () => void;
+  /** Fired when the doors are mostly open and content starts revealing */
+  onDoorsOpen?: () => void;
 }
 
-export default function HeroDoorReveal({
-  onAnimationDone,
-}: HeroDoorRevealProps) {
-  const [phase, setPhase] = useState<AnimationPhase>("idle");
+export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const callbackFiredRef = useRef(false);
+  const firedRef = useRef(false);
 
-  /* Cleanup timers on unmount */
-  const clearTimers = useCallback(() => {
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
-  }, []);
+  /* ── Scroll progress: 0 at top of wrapper, 1 when wrapper ends ── */
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
 
-  const addTimer = useCallback(
-    (callback: () => void, delay: number) => {
-      const id = setTimeout(callback, delay);
-      timersRef.current.push(id);
-      return id;
-    },
-    []
+  /* Fire callback once when doors are open */
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    if (v >= DOORS_OPEN_THRESHOLD && !firedRef.current) {
+      firedRef.current = true;
+      onDoorsOpen?.();
+    }
+  });
+
+  /* ── Intro text (0% → 28%) ── */
+  const introOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.1, 0.18, 0.28],
+    [0, 1, 1, 0]
+  );
+  const introY = useTransform(
+    scrollYProgress,
+    [0, 0.1, 0.18, 0.28],
+    [20, 0, 0, -15]
   );
 
-  useEffect(() => {
-    /* Reduced-motion: skip animation entirely */
-    if (prefersReducedMotion) {
-      setPhase("complete");
-      if (!callbackFiredRef.current) {
-        callbackFiredRef.current = true;
-        onAnimationDone?.();
-      }
-      return;
-    }
+  /* ── Door panels (28% → 68%) ── */
+  const leftDoorRotation = useTransform(
+    scrollYProgress,
+    [0.28, 0.68],
+    [0, -DOOR_ROTATION_DEG]
+  );
+  const rightDoorRotation = useTransform(
+    scrollYProgress,
+    [0.28, 0.68],
+    [0, DOOR_ROTATION_DEG]
+  );
+  const doorOpacity = useTransform(
+    scrollYProgress,
+    [0.58, 0.68],
+    [1, 0]
+  );
 
-    /* Phase 1: Show intro text after initial delay */
-    addTimer(() => setPhase("intro-text"), INTRO_TEXT_DELAY_MS);
+  /* ── Background scale (28% → 72%) ── */
+  const bgScale = useTransform(
+    scrollYProgress,
+    [0.28, 0.72],
+    [1.08, 1]
+  );
 
-    /* Phase 2: Fade intro text */
-    addTimer(
-      () => setPhase("intro-fade"),
-      INTRO_TEXT_DELAY_MS + INTRO_TEXT_DISPLAY_MS
-    );
+  /* ── Hero content stagger (62% → 88%) ── */
+  const headlineOpacity = useTransform(
+    scrollYProgress,
+    [0.62, 0.76],
+    [0, 1]
+  );
+  const headlineY = useTransform(
+    scrollYProgress,
+    [0.62, 0.76],
+    [30, 0]
+  );
 
-    /* Phase 3: Open doors after intro text fades */
-    addTimer(
-      () => setPhase("doors-opening"),
-      INTRO_TEXT_DELAY_MS + INTRO_TEXT_DISPLAY_MS + 600
-    );
+  const subheadlineOpacity = useTransform(
+    scrollYProgress,
+    [0.68, 0.82],
+    [0, 1]
+  );
+  const subheadlineY = useTransform(
+    scrollYProgress,
+    [0.68, 0.82],
+    [30, 0]
+  );
 
-    /* Phase 4: Reveal content at ~70% of door animation */
-    const contentRevealTime =
-      INTRO_TEXT_DELAY_MS +
-      INTRO_TEXT_DISPLAY_MS +
-      600 +
-      DOOR_OPEN_DURATION * 700;
+  const ctaOpacity = useTransform(
+    scrollYProgress,
+    [0.74, 0.88],
+    [0, 1]
+  );
+  const ctaY = useTransform(
+    scrollYProgress,
+    [0.74, 0.88],
+    [30, 0]
+  );
 
-    addTimer(() => {
-      setPhase("content-reveal");
-      if (!callbackFiredRef.current) {
-        callbackFiredRef.current = true;
-        onAnimationDone?.();
-      }
-    }, contentRevealTime);
+  /* ── Scroll indicator (fades away as user starts scrolling) ── */
+  const scrollIndicatorOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.04, 0.12],
+    [1, 1, 0]
+  );
 
-    /* Phase 5: Animation complete */
-    addTimer(
-      () => setPhase("complete"),
-      INTRO_TEXT_DELAY_MS +
-        INTRO_TEXT_DISPLAY_MS +
-        600 +
-        DOOR_OPEN_DURATION * 1000 +
-        800
-    );
-
-    return clearTimers;
-  }, [prefersReducedMotion, addTimer, clearTimers, onAnimationDone]);
-
-  const doorsOpen =
-    phase === "doors-opening" ||
-    phase === "content-reveal" ||
-    phase === "complete";
-
-  const backgroundRevealed = doorsOpen;
-
-  const contentVisible =
-    phase === "content-reveal" || phase === "complete";
-
-  const showIntroText = phase === "intro-text";
-  const hideIntroText =
-    phase === "intro-fade" ||
-    phase === "doors-opening" ||
-    phase === "content-reveal" ||
-    phase === "complete";
-
-  return (
-    <section
-      id="hero-door-reveal"
-      className="relative w-full h-screen overflow-hidden bg-black"
-      style={{
-        perspective: "2200px",
-        perspectiveOrigin: "50% 50%",
-      }}
-      aria-label="Hero section — Futureline Education"
-    >
-      {/* ── Background Image (underneath doors) ── */}
-      <motion.div
-        className="absolute inset-0 z-0 will-change-transform"
-        variants={backgroundVariants}
-        initial="hidden"
-        animate={backgroundRevealed ? "revealed" : "hidden"}
+  /* ── Reduced motion: skip animation, show final state ── */
+  if (prefersReducedMotion) {
+    return (
+      <section
+        id="hero-door-reveal"
+        className="relative w-full h-screen overflow-hidden bg-black"
+        aria-label="Hero section — Futureline Education"
       >
-        <Image
-          src="/img/home/hero/hero.png"
-          alt="Futureline Education — premium office reception showcasing excellence, integrity, guidance and success"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-          quality={90}
-        />
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/img/home/hero/hero.png"
+            alt="Futureline Education — premium office reception showcasing excellence, integrity, guidance and success"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+            quality={90}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+        </div>
 
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-      </motion.div>
-
-      {/* ── Intro Text (appears before doors open) ── */}
-      <motion.div
-        className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none px-6"
-        variants={introTextVariants}
-        initial="hidden"
-        animate={
-          showIntroText ? "visible" : hideIntroText ? "exit" : "hidden"
-        }
-      >
-        <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#d3a044] text-center leading-relaxed tracking-wide select-none italic">
-          The path to your dreams is…
-        </p>
-      </motion.div>
-
-      {/* ── Left Door Panel ── */}
-      <motion.div
-        className="absolute top-0 left-0 w-1/2 h-full z-20 will-change-transform"
-        style={{
-          transformOrigin: "left center",
-          transformStyle: "preserve-3d",
-          backfaceVisibility: "hidden",
-        }}
-        variants={leftDoorVariants}
-        initial="closed"
-        animate={doorsOpen ? "open" : "closed"}
-      >
-        <Image
-          src="/img/home/hero/left.png"
-          alt=""
-          fill
-          priority
-          sizes="50vw"
-          className="object-cover object-right"
-          quality={90}
-          aria-hidden="true"
-        />
-      </motion.div>
-
-      {/* ── Right Door Panel ── */}
-      <motion.div
-        className="absolute top-0 right-0 w-1/2 h-full z-20 will-change-transform"
-        style={{
-          transformOrigin: "right center",
-          transformStyle: "preserve-3d",
-          backfaceVisibility: "hidden",
-        }}
-        variants={rightDoorVariants}
-        initial="closed"
-        animate={doorsOpen ? "open" : "closed"}
-      >
-        <Image
-          src="/img/home/hero/right.png"
-          alt=""
-          fill
-          priority
-          sizes="50vw"
-          className="object-cover object-left"
-          quality={90}
-          aria-hidden="true"
-        />
-      </motion.div>
-
-      {/* ── Hero Content (reveals after doors ~70% open) ── */}
-      <motion.div
-        className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28 px-6 pointer-events-none"
-        variants={contentContainerVariants}
-        initial="hidden"
-        animate={contentVisible ? "visible" : "hidden"}
-      >
-        {/* Headline */}
-        <motion.h1
-          className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white text-center leading-tight mb-4 drop-shadow-lg select-none italic"
-          variants={contentItemVariants}
-        >
-          Unlock Your Future
-        </motion.h1>
-
-        {/* Subheadline */}
-        <motion.p
-          className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-white/85 text-center max-w-2xl mb-8 md:mb-10 drop-shadow-md select-none"
-          variants={contentItemVariants}
-        >
-          Where dreams become global opportunities.
-        </motion.p>
-
-        {/* CTA Button */}
-        <motion.div variants={contentItemVariants}>
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28 px-6">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white text-center leading-tight mb-4 drop-shadow-lg select-none italic">
+            Unlock Your Future
+          </h1>
+          <p className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-white/85 text-center max-w-2xl mb-8 md:mb-10 drop-shadow-md select-none">
+            Where dreams become global opportunities.
+          </p>
           <a
             href="#get-started"
-            className="
-              pointer-events-auto
-              inline-flex items-center justify-center
-              px-8 py-3.5 sm:px-10 sm:py-4
-              bg-[#d3a044] text-white
-              font-body font-semibold text-base sm:text-lg
-              rounded-full
-              shadow-lg shadow-[#d3a044]/30
-              hover:bg-[#b88b3a] hover:shadow-xl hover:shadow-[#d3a044]/40
-              hover:scale-[1.03]
-              active:scale-[0.98]
-              transition-all duration-300 ease-out
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d3a044] focus-visible:ring-offset-2 focus-visible:ring-offset-black
-            "
+            className="inline-flex items-center justify-center px-8 py-3.5 sm:px-10 sm:py-4 bg-[#d3a044] text-white font-body font-semibold text-base sm:text-lg rounded-full shadow-lg shadow-[#d3a044]/30"
             id="hero-cta-get-started"
           >
             Get Started
           </a>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      id="hero-scroll-container"
+      className="relative"
+      style={{ height: `${SCROLL_HEIGHT_MULTIPLIER * 100}vh` }}
+    >
+      {/* Sticky hero — stays pinned while the wrapper scrolls behind it */}
+      <section
+        id="hero-door-reveal"
+        className="sticky top-0 w-full h-screen overflow-hidden bg-black"
+        style={{
+          perspective: "2200px",
+          perspectiveOrigin: "50% 50%",
+        }}
+        aria-label="Hero section — Futureline Education"
+      >
+        {/* ── Background Image (underneath doors) ── */}
+        <motion.div
+          className="absolute inset-0 z-0 will-change-transform"
+          style={{ scale: bgScale }}
+        >
+          <Image
+            src="/img/home/hero/hero.png"
+            alt="Futureline Education — premium office reception showcasing excellence, integrity, guidance and success"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+            quality={90}
+          />
+
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
         </motion.div>
-      </motion.div>
-    </section>
+
+        {/* ── Intro Text (appears early, fades before doors open) ── */}
+        <motion.div
+          className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none px-6"
+          style={{ opacity: introOpacity, y: introY }}
+        >
+          <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#d3a044] text-center leading-relaxed tracking-wide select-none italic">
+            The path to your dreams is…
+          </p>
+        </motion.div>
+
+        {/* ── Left Door Panel ── */}
+        <motion.div
+          className="absolute top-0 left-0 w-1/2 h-full z-20 will-change-transform"
+          style={{
+            transformOrigin: "left center",
+            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden",
+            rotateY: leftDoorRotation,
+            opacity: doorOpacity,
+          }}
+        >
+          <Image
+            src="/img/home/hero/left.png"
+            alt=""
+            fill
+            priority
+            sizes="50vw"
+            className="object-cover object-right"
+            quality={90}
+            aria-hidden="true"
+          />
+        </motion.div>
+
+        {/* ── Right Door Panel ── */}
+        <motion.div
+          className="absolute top-0 right-0 w-1/2 h-full z-20 will-change-transform"
+          style={{
+            transformOrigin: "right center",
+            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden",
+            rotateY: rightDoorRotation,
+            opacity: doorOpacity,
+          }}
+        >
+          <Image
+            src="/img/home/hero/right.png"
+            alt=""
+            fill
+            priority
+            sizes="50vw"
+            className="object-cover object-left"
+            quality={90}
+            aria-hidden="true"
+          />
+        </motion.div>
+
+        {/* ── Hero Content (reveals as doors finish opening) ── */}
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28 px-6 pointer-events-none">
+          {/* Headline */}
+          <motion.h1
+            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white text-center leading-tight mb-4 drop-shadow-lg select-none italic"
+            style={{ opacity: headlineOpacity, y: headlineY }}
+          >
+            Unlock Your Future
+          </motion.h1>
+
+          {/* Sub-headline */}
+          <motion.p
+            className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-white/85 text-center max-w-2xl mb-8 md:mb-10 drop-shadow-md select-none"
+            style={{ opacity: subheadlineOpacity, y: subheadlineY }}
+          >
+            Where dreams become global opportunities.
+          </motion.p>
+
+          {/* CTA Button */}
+          <motion.div style={{ opacity: ctaOpacity, y: ctaY }}>
+            <a
+              href="#get-started"
+              className="
+                pointer-events-auto
+                inline-flex items-center justify-center
+                px-8 py-3.5 sm:px-10 sm:py-4
+                bg-[#d3a044] text-white
+                font-body font-semibold text-base sm:text-lg
+                rounded-full
+                shadow-lg shadow-[#d3a044]/30
+                hover:bg-[#b88b3a] hover:shadow-xl hover:shadow-[#d3a044]/40
+                hover:scale-[1.03]
+                active:scale-[0.98]
+                transition-all duration-300 ease-out
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d3a044] focus-visible:ring-offset-2 focus-visible:ring-offset-black
+              "
+              id="hero-cta-get-started"
+            >
+              Get Started
+            </a>
+          </motion.div>
+        </div>
+
+        {/* ── Scroll Indicator (Apple-style mouse icon) ── */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-3 pointer-events-none"
+          style={{ opacity: scrollIndicatorOpacity }}
+        >
+          <span className="text-white/50 text-[11px] font-body tracking-[0.25em] uppercase select-none">
+            Scroll to explore
+          </span>
+          <div className="w-6 h-10 rounded-full border-2 border-white/25 flex items-start justify-center pt-2">
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full bg-[#d3a044] animate-pulse-ring"
+              animate={{ y: [0, 14, 0] }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </div>
+        </motion.div>
+      </section>
+    </div>
   );
 }
