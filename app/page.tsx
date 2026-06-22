@@ -6,16 +6,16 @@ import Navbar from "@/components/layout/Navbar";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 
 export default function Home() {
-  const [heroAnimationDone, setHeroAnimationDone] = useState(false);
+  const [doorsOpen, setDoorsOpen] = useState(false);
 
-  const handleAnimationDone = useCallback(() => {
-    setHeroAnimationDone(true);
+  const handleDoorsOpen = useCallback(() => {
+    setDoorsOpen(true);
   }, []);
 
   return (
     <SmoothScrollProvider>
-      <Navbar heroAnimationDone={heroAnimationDone} />
-      <HeroDoorReveal onAnimationDone={handleAnimationDone} />
+      <Navbar doorsOpen={doorsOpen} />
+      <HeroDoorReveal onDoorsOpen={handleDoorsOpen} />
 
       {/* Placeholder section to demonstrate navbar bg transition on scroll */}
       <section className="py-20 md:py-28 bg-gray-50">

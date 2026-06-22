@@ -72,6 +72,37 @@
   }
 }
 
+/* ----- Navbar shimmer CTA ----- */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@utility animate-shimmer {
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+/* ----- Scroll indicator pulse ring ----- */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 160, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(211, 160, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 160, 68, 0);
+  }
+}
+
+@utility animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
