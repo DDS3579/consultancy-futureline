@@ -1,0 +1,61 @@
+/* app/globals.css */
+@import "tailwindcss";
+
+/* ----- Theme Tokens (colors, fonts, etc.) ----- */
+@theme {
+  /* Fonts – these will map to CSS variables from layout.tsx */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  /* Colors (optional, but nice to have) */
+  --color-brand-black: #000000;
+  --color-brand-gray: #6f6f6f;
+  --color-brand-white: #ffffff;
+}
+
+/* ----- Custom Animations (v4 way) ----- */
+@keyframes fade-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-rise-delay {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-rise-delay-2 {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Create utility classes for the animations */
+@utility animate-fade-rise {
+  animation: fade-rise 0.8s ease-out forwards;
+}
+
+@utility animate-fade-rise-delay {
+  animation: fade-rise-delay 0.8s ease-out 0.2s forwards;
+}
+
+@utility animate-fade-rise-delay-2 {
+  animation: fade-rise-delay-2 0.8s ease-out 0.4s forwards;
+}
