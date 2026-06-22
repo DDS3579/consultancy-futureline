@@ -17,8 +17,8 @@ Your goal is to generate production-ready, accessible, and highly performant UI 
 
 ### Typography
 The project uses a dual-font system. Assume `font-display` and `font-body` are configured in `tailwind.config.js`.
-- **Headings (Display/Accent):** Use `font-display` (Instrument Serif) for all `h1`, `h2`, `h3` tags, hero headlines, and logos.
-- **Body & UI:** Use `font-body` (Inter) for navigation, paragraphs, descriptions, buttons, and form inputs.
+- **Headings (Display/Accent):** Use `font-display` (Playfair Display) for all `h1`, `h2`, `h3` tags, hero headlines, and logos.
+- **Body & UI:** Use `font-body` (DM Sans) for navigation, paragraphs, descriptions, buttons, and form inputs.
 
 ### Color Palette
 - **Main Brand (Navy):** `[#124a6d]` (Use for primary buttons, active states, key headings, and footer backgrounds).
