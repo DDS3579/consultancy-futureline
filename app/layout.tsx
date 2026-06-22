@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Inter } from "next/font/google";
-import "./globals.css"; 
+import { Playfair_Display, DM_Sans } from "next/font/google";
+import "./globals.css";
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400", 
+const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-display", 
+  variable: "--font-display",
+  display: "swap",
 });
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-body", 
+  variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Aethera",
-  description: "Beyond silence, we build the eternal.",
+  title: "Futureline Education — Unlock Your Future",
+  description:
+    "Futureline Education is a premium educational consultancy that transforms dreams into global opportunities. Expert guidance for study abroad, visa processing, test preparation, and career counselling.",
 };
 
 export default function RootLayout({
@@ -24,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${instrumentSerif.variable} ${inter.variable}`}>
+    <html
+      lang="en"
+      className={`${playfairDisplay.variable} ${dmSans.variable}`}
+    >
       <body className="font-body bg-white antialiased">
         {children}
       </body>
