@@ -9,6 +9,7 @@ import OurServices from "@/components/home/OurServices";
 import PopularDestinations from "@/components/home/PopularDestinations";
 import WhyChooseFutureline from "@/components/home/WhyChooseFutureline";
 import CtaSection from "@/components/home/CtaSection";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   const [doorsOpen, setDoorsOpen] = useState(false);
@@ -36,6 +37,9 @@ export default function Home() {
 
       {/* Get Started */}
       <CtaSection/>
+
+      {/* Footer Section */}
+      <Footer />
 
     </SmoothScrollProvider>
   );

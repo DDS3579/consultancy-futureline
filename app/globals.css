@@ -86,6 +86,21 @@
   animation: shimmer-sweep 3s ease-in-out infinite;
 }
 
+/* ----- Background Ken Burns Animation ----- */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.04);
+  }
+}
+
+@utility animate-ken-burns {
+  animation: ken-burns 20s linear infinite alternate;
+}
+
+
 /* ----- Scroll indicator pulse ring ----- */
 @keyframes pulse-ring {
   0% {
