@@ -9,6 +9,8 @@ import {
   useReducedMotion,
   useMotionValueEvent,
 } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+
 
 /* ─────────────────────────── Constants ─────────────────────────── */
 
@@ -146,7 +148,7 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
     return (
       <section
         id="hero-door-reveal"
-        className="relative w-full h-screen overflow-hidden bg-black"
+        className="relative w-full h-svh md:h-screen overflow-hidden bg-black"
         aria-label="Hero section — Futureline Education"
       >
         <div className="absolute inset-0 z-0">
@@ -159,27 +161,145 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
             className="object-cover object-center"
             quality={90}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+          {/* Cinematic grading — bottom-heavy for text contrast, preserves office warmth */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(8,32,50,0.25) 0%, rgba(8,32,50,0.45) 40%, rgba(8,32,50,0.72) 100%)",
+            }}
+          />
+          {/* Vignette for cinematic depth */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 30%, rgba(8,32,50,0.4) 100%)",
+            }}
+          />
         </div>
 
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28 px-6">
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white text-center leading-tight mb-4 drop-shadow-lg select-none italic">
+        <div
+          className="absolute z-10 flex flex-col items-center text-center px-6 pointer-events-none w-full max-w-[960px]"
+          style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {/* Atmospheric golden glow */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none rounded-full w-[400px] h-[250px] md:w-[700px] md:h-[400px]"
+            style={{
+              background:
+                "radial-gradient(ellipse, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.06) 50%, transparent 70%)",
+              filter: "blur(60px)",
+            }}
+          />
+
+          {/* Eyebrow text */}
+          <p className="font-body text-[11px] sm:text-[12px] md:text-[13px] text-[#D4AF37]/90 tracking-[0.3em] uppercase select-none mb-5 z-10 animate-fade-rise">
+            Premium Educational Consultancy
+          </p>
+
+          {/* Decorative gold line */}
+          <div className="w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent mb-6 animate-fade-rise" />
+
+          {/* Headline */}
+          <h1
+            className="font-display text-[42px] md:text-[60px] lg:text-[clamp(68px,8vw,100px)] text-white text-center leading-[0.95] font-semibold italic select-none max-w-[320px] md:max-w-none lg:max-w-[900px] mx-auto z-10 animate-fade-rise-delay"
+            style={{
+              textShadow:
+                "0 2px 20px rgba(0,0,0,0.3), 0 8px 60px rgba(8,32,50,0.4)",
+              letterSpacing: "0.01em",
+            }}
+          >
             Unlock Your Future
           </h1>
-          <p className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-white/85 text-center max-w-2xl mb-8 md:mb-10 drop-shadow-md select-none">
+
+          {/* Sub-headline */}
+          <p className="font-body text-[17px] md:text-[20px] lg:text-[24px] text-white/85 text-center leading-[1.6] select-none mt-7 max-w-[300px] md:max-w-[580px] lg:max-w-[620px] mx-auto z-10 animate-fade-rise-delay-2">
             Where dreams become global opportunities.
           </p>
-          <a
-            href="#get-started"
-            className="inline-flex items-center justify-center px-8 py-3.5 sm:px-10 sm:py-4 bg-[#d3a044] text-white font-body font-semibold text-base sm:text-lg rounded-full shadow-lg shadow-[#d3a044]/30"
-            id="hero-cta-get-started"
-          >
-            Get Started
-          </a>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mt-10 w-full sm:w-auto pointer-events-auto z-10 animate-fade-rise-delay-2">
+            <a
+              href="#get-started"
+              className="
+                group w-full sm:w-auto max-w-[280px] sm:max-w-none h-[56px] px-9
+                inline-flex items-center justify-center gap-2
+                text-white font-body font-semibold text-[15px]
+                rounded-full border border-white/10
+                transition-all duration-300 ease-out
+                hover:scale-[1.03] active:scale-[0.98]
+                hover:brightness-110
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-black
+              "
+              style={{
+                background:
+                  "linear-gradient(135deg, #D4AF37 0%, #C8A030 50%, #D4AF37 100%)",
+                boxShadow:
+                  "0 8px 32px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+              }}
+              id="hero-cta-get-started"
+            >
+              Get Started
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </a>
+
+            <a
+              href="/contact"
+              className="
+                w-full sm:w-auto max-w-[280px] sm:max-w-none h-[56px] px-9
+                inline-flex items-center justify-center
+                bg-white/[0.08] hover:bg-white/[0.14] text-white
+                backdrop-blur-2xl
+                border border-white/[0.15] hover:border-white/25
+                font-body font-semibold text-[15px]
+                rounded-full
+                transition-all duration-300 ease-out
+                hover:scale-[1.03] active:scale-[0.98]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black
+              "
+              id="hero-cta-free-consultation"
+            >
+              Free Consultation
+            </a>
+          </div>
+
+          {/* Trust Bar — frosted glass pill */}
+          <div className="mt-12 z-10 animate-fade-rise-delay-2">
+            <div
+              className="inline-flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <div className="flex items-center gap-2 text-[13px] sm:text-[14px] text-white/80 font-body">
+                <span className="text-[#D4AF37] text-[11px]">★★★★★</span>
+                <span>Rated by Students</span>
+              </div>
+              <div className="hidden sm:block w-[1px] h-4 bg-white/15" />
+              <div className="flex items-center gap-3 sm:gap-4 text-[13px] sm:text-[14px] text-white/60 font-body">
+                <span>USA</span>
+                <span className="text-white/20">·</span>
+                <span>UK</span>
+                <span className="text-white/20">·</span>
+                <span>Australia</span>
+                <span className="text-white/20">·</span>
+                <span>Canada</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     );
   }
+
 
   return (
     <div
@@ -191,10 +311,11 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
       {/* Sticky hero — stays pinned while the wrapper scrolls behind it */}
       <section
         id="hero-door-reveal"
-        className="sticky top-0 w-full h-screen overflow-hidden bg-black"
+        className="sticky top-0 w-full h-svh md:h-screen overflow-hidden bg-black"
         style={{
           perspective: "2200px",
           perspectiveOrigin: "50% 50%",
+          touchAction: "pan-y",
         }}
         aria-label="Hero section — Futureline Education"
       >
@@ -209,12 +330,26 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center"
+            className="object-cover object-center animate-ken-burns"
             quality={90}
           />
 
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+          {/* Cinematic grading — bottom-heavy for text contrast, preserves office warmth */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(8,32,50,0.25) 0%, rgba(8,32,50,0.45) 40%, rgba(8,32,50,0.72) 100%)",
+            }}
+          />
+          {/* Vignette for cinematic depth */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 30%, rgba(8,32,50,0.4) 100%)",
+            }}
+          />
         </motion.div>
 
         {/* ── Intro Text (appears early, fades before doors open) ── */}
@@ -229,7 +364,7 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
 
         {/* ── Left Door Panel ── */}
         <motion.div
-          className="absolute top-0 left-0 w-1/2 h-full z-20 will-change-transform"
+          className="absolute top-0 left-0 w-1/2 h-full z-20 will-change-transform pointer-events-none"
           style={{
             transformOrigin: "left center",
             transformStyle: "preserve-3d",
@@ -252,7 +387,7 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
 
         {/* ── Right Door Panel ── */}
         <motion.div
-          className="absolute top-0 right-0 w-1/2 h-full z-20 will-change-transform"
+          className="absolute top-0 right-0 w-1/2 h-full z-20 will-change-transform pointer-events-none"
           style={{
             transformOrigin: "right center",
             transformStyle: "preserve-3d",
@@ -274,47 +409,151 @@ export default function HeroDoorReveal({ onDoorsOpen }: HeroDoorRevealProps) {
         </motion.div>
 
         {/* ── Hero Content (reveals as doors finish opening) ── */}
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28 px-6 pointer-events-none">
+        <div
+          className="absolute z-10 flex flex-col items-center text-center px-6 pointer-events-none w-full max-w-[960px]"
+          style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {/* Atmospheric golden glow */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none rounded-full w-[400px] h-[250px] md:w-[700px] md:h-[400px]"
+            style={{
+              background:
+                "radial-gradient(ellipse, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.06) 50%, transparent 70%)",
+              filter: "blur(60px)",
+              opacity: headlineOpacity,
+            }}
+          />
+
+          {/* Eyebrow text */}
+          <motion.p
+            className="font-body text-[11px] sm:text-[12px] md:text-[13px] text-[#D4AF37]/90 tracking-[0.3em] uppercase select-none mb-5 z-10"
+            style={{ opacity: headlineOpacity, y: headlineY }}
+          >
+            Premium Educational Consultancy
+          </motion.p>
+
+          {/* Decorative gold line */}
+          <motion.div
+            className="w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent mb-6"
+            style={{ opacity: headlineOpacity, y: headlineY }}
+          />
+
           {/* Headline */}
           <motion.h1
-            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white text-center leading-tight mb-4 drop-shadow-lg select-none italic"
-            style={{ opacity: headlineOpacity, y: headlineY }}
+            className="font-display text-[42px] md:text-[60px] lg:text-[clamp(68px,8vw,100px)] text-white text-center leading-[0.95] font-semibold italic select-none max-w-[320px] md:max-w-none lg:max-w-[900px] mx-auto z-10"
+            style={{
+              opacity: headlineOpacity,
+              y: headlineY,
+              textShadow:
+                "0 2px 20px rgba(0,0,0,0.3), 0 8px 60px rgba(8,32,50,0.4)",
+              letterSpacing: "0.01em",
+            }}
           >
             Unlock Your Future
           </motion.h1>
 
           {/* Sub-headline */}
           <motion.p
-            className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-white/85 text-center max-w-2xl mb-8 md:mb-10 drop-shadow-md select-none"
+            className="font-body text-[17px] md:text-[20px] lg:text-[24px] text-white/85 text-center leading-[1.6] select-none mt-7 max-w-[300px] md:max-w-[580px] lg:max-w-[620px] mx-auto z-10"
             style={{ opacity: subheadlineOpacity, y: subheadlineY }}
           >
             Where dreams become global opportunities.
           </motion.p>
 
-          {/* CTA Button */}
-          <motion.div style={{ opacity: ctaOpacity, y: ctaY }}>
+          {/* CTA Buttons */}
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mt-10 w-full sm:w-auto pointer-events-auto z-10"
+            style={{ opacity: ctaOpacity, y: ctaY }}
+          >
             <a
               href="#get-started"
               className="
-                pointer-events-auto
-                inline-flex items-center justify-center
-                px-8 py-3.5 sm:px-10 sm:py-4
-                bg-[#d3a044] text-white
-                font-body font-semibold text-base sm:text-lg
-                rounded-full
-                shadow-lg shadow-[#d3a044]/30
-                hover:bg-[#b88b3a] hover:shadow-xl hover:shadow-[#d3a044]/40
-                hover:scale-[1.03]
-                active:scale-[0.98]
+                group w-full sm:w-auto max-w-[280px] sm:max-w-none h-[56px] px-9
+                inline-flex items-center justify-center gap-2
+                text-white font-body font-semibold text-[15px]
+                rounded-full border border-white/10
                 transition-all duration-300 ease-out
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d3a044] focus-visible:ring-offset-2 focus-visible:ring-offset-black
+                hover:scale-[1.03] active:scale-[0.98]
+                hover:brightness-110
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-black
               "
+              style={{
+                background:
+                  "linear-gradient(135deg, #D4AF37 0%, #C8A030 50%, #D4AF37 100%)",
+                boxShadow:
+                  "0 8px 32px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+              }}
               id="hero-cta-get-started"
             >
               Get Started
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </a>
+
+            <a
+              href="/contact"
+              className="
+                w-full sm:w-auto max-w-[280px] sm:max-w-none h-[56px] px-9
+                inline-flex items-center justify-center
+                bg-white/[0.08] hover:bg-white/[0.14] text-white
+                backdrop-blur-2xl
+                border border-white/[0.15] hover:border-white/25
+                font-body font-semibold text-[15px]
+                rounded-full
+                transition-all duration-300 ease-out
+                hover:scale-[1.03] active:scale-[0.98]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black
+              "
+              id="hero-cta-free-consultation"
+            >
+              Free Consultation
             </a>
           </motion.div>
+
+          {/* Trust Bar — frosted glass pill */}
+          <motion.div
+            className="mt-12 z-10"
+            style={{ opacity: ctaOpacity }}
+          >
+            <div
+              className="inline-flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <div className="flex items-center gap-2 text-[13px] sm:text-[14px] text-white/80 font-body">
+                <span className="text-[#D4AF37] text-[11px]">★★★★★</span>
+                <span>Rated by Students</span>
+              </div>
+              <div className="hidden sm:block w-[1px] h-4 bg-white/15" />
+              <div className="flex items-center gap-3 sm:gap-4 text-[13px] sm:text-[14px] text-white/60 font-body">
+                <span>USA</span>
+                <span className="text-white/20">·</span>
+                <span>UK</span>
+                <span className="text-white/20">·</span>
+                <span>Australia</span>
+                <span className="text-white/20">·</span>
+                <span>Canada</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
+
+        {/* ── Bottom Ambient Glow (adds atmospheric depth) ── */}
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] pointer-events-none z-[5]"
+          style={{
+            background:
+              "radial-gradient(ellipse at center bottom, rgba(212,175,55,0.06) 0%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
 
         {/* ── Scroll Indicator (Apple-style mouse icon) ── */}
         <motion.div

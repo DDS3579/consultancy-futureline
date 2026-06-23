@@ -18,13 +18,23 @@ export default function SmoothScrollProvider({
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    /* Skip Lenis on touch-primary devices (mobile/tablet).
+       Native touch scrolling works perfectly with Framer Motion's
+       useScroll and avoids the scroll-hijacking issues Lenis causes
+       on touch screens. */
+    const isTouchDevice =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia("(pointer: coarse)").matches;
+
+    if (isTouchDevice) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
-      touchMultiplier: 2,
     });
 
     lenisRef.current = lenis;
