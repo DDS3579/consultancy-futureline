@@ -246,6 +246,17 @@ This is the core signature landing experience of the website:
     *   *Action:* An "Explore Destination" transition button at the bottom featuring a circular arrow chevron that moves horizontally on hover.
     *   *Badges:* Features custom-colored badges in the top right corner indicating tags like "Top Choice", "PR Friendly", etc., backed by specific Lucide icons.
 
+### D. Premium Responsive Footer (`components/layout/Footer.tsx`)
+*   **Concept:** A information-rich, multi-column deep-navy footer representing the visual anchor of the brand.
+*   **Styling:**
+    *   *Background:* Solid ultra-deep navy (`bg-[#0b2c42]`) with light/muted text states and accent gold (`#d3a044` / `#e8c878`) headings/highlights.
+    *   *Grid:* Responsive 12-column grid collapsing cleanly to 2-columns (tablet) and 1-column (mobile).
+*   **Key Sections:**
+    *   *Newsletter Bar:* Full-width top row containing a stylized email intake form and gold CTA button.
+    *   *Company Profile:* Logo embed, brand overview, and custom social link icons with gold hover boundaries.
+    *   *Link Hubs:* Categories for destinations, services, quick links, and comprehensive office contact details (address, email, phone, operation hours).
+    *   *Bottom Bar:* Copyright notices, Government registration disclosures, legal links (Privacy, Terms), and a smooth back-to-top scrolling utility.
+
 ---
 
 ## 9. Coding Guidelines & Implementation Rules
