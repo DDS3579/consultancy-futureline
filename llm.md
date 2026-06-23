@@ -237,6 +237,15 @@ This is the core signature landing experience of the website:
 *   **Transition:** Nav bar starts completely transparent with white text (so it sits cleanly over the dark hero section). When the user scrolls past the hero section threshold, the navbar transitions smoothly to a solid white header with a drop shadow, thin border, and dark gray text.
 *   **Components:** Logo image (left), Navigation links (middle), "More" hover dropdown menu (middle right), and Gold Shimmer CTA (right).
 
+### C. Popular Destinations Section (`components/home/PopularDestinations.tsx`)
+*   **Concept:** A grid of premium image-based destination cards representing primary study-abroad locations (Australia, UK, USA, Canada).
+*   **Card Design:**
+    *   *Visuals:* A relative card box with a height of `450px` containing a `fill`-configured cover image that scales on hover (`scale-110` with a smooth ease-out transition).
+    *   *Overlay:* A dark blue gradient mask (`bg-gradient-to-t from-[#124a6d]/95 via-[#124a6d]/40 to-black/20`) that deepens on card hover.
+    *   *Content Stacking:* A white/gold metadata block floats over the bottom, displaying Country Name (large, italicized Display font), a brief tagline, and a list of key stats (e.g. number of institutions, post-study work route details, intakes).
+    *   *Action:* An "Explore Destination" transition button at the bottom featuring a circular arrow chevron that moves horizontally on hover.
+    *   *Badges:* Features custom-colored badges in the top right corner indicating tags like "Top Choice", "PR Friendly", etc., backed by specific Lucide icons.
+
 ---
 
 ## 9. Coding Guidelines & Implementation Rules
