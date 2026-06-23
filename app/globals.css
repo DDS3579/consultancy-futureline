@@ -226,3 +226,10 @@
     @apply font-sans;
   }
 }
+
+@keyframes fl-rise {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  10%  { opacity: 0.6; }
+  80%  { opacity: 0.12; }
+  100% { transform: translateY(-260px) translateX(var(--dx)); opacity: 0; }
+}
