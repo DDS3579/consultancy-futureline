@@ -80,10 +80,10 @@ const mobileMenuVariants = {
 
 interface NavbarProps {
   /** Whether the hero doors have opened (navbar fades in after this) */
-  doorsOpen: boolean;
+  doorsOpen?: boolean;
 }
 
-export default function Navbar({ doorsOpen }: NavbarProps) {
+export default function Navbar({ doorsOpen = true }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
