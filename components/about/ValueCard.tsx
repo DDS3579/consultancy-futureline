@@ -38,16 +38,6 @@ export function ValueCard({ icon: Icon, title, body }: ValueCardProps) {
           {body}
         </p>
       </div>
-
-      <style jsx>{`
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.005); }
-        }
-        div {
-          animation: breathe 4s ease-in-out infinite;
-        }
-      `}</style>
     </motion.div>
   );
 }

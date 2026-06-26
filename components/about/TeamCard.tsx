@@ -57,7 +57,7 @@ export function TeamCard({ member, isFounder = false }: TeamCardProps) {
       <div className="relative overflow-hidden rounded-2xl border-b-4 border-[#d3a044] shadow-lg" style={{ transform: 'translateZ(0)' }}>
         <div className={`relative w-full ${isFounder ? 'h-96' : 'h-80'}`}>
           {/* Placeholder for next/image. Using div for visual representation in this environment */}
-          <div className="absolute inset-0 bg-gray-300 transition-transform duration-700 group-hover:scale-108" 
+          <div className="absolute inset-0 bg-gray-300 transition-transform duration-700 group-hover:scale-[1.08]" 
                style={{ backgroundImage: `url(${member.portrait})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
           
           {/* Navy overlay rise */}
@@ -78,7 +78,7 @@ export function TeamCard({ member, isFounder = false }: TeamCardProps) {
           </h3>
           <p className="font-body text-sm text-gray-600">{member.title}</p>
         </div>
-        <div className="flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
           <a href={member.linkedin} className="rounded-full bg-[#124a6d] p-2 text-white hover:bg-[#0f3c58]" aria-label="LinkedIn">
             <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
               <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>

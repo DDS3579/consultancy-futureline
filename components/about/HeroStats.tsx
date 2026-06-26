@@ -18,7 +18,7 @@ export function HeroStats() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="absolute bottom-8 left-0 right-0 z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+      className="w-full"
     >
       <div className="grid grid-cols-2 gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md md:grid-cols-4">
         {stats.map((stat, i) => (
